@@ -1,0 +1,36 @@
+services:
+  order-micro:
+    container_name: order_microservice
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "5003:5003"
+    environment:
+      - PORT=5003
+      - MONGO_URL=mongodb+srv://b80954643_db_user:Boyd1209@cluster0.oxcbzu5.mongodb.net/ecommerce_commerce_db?retryWrites=true&w=majority&appName=Cluster0
+    restart: on-failure
+
+  payment-micro:
+    container_name: payment_microservice
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    ports:
+      - "5004:5004"
+    environment:
+      - PORT=5004
+      - MONGO_URL=mongodb+srv://b80954643_db_user:Boyd1209@cluster0.oxcbzu5.mongodb.net/ecommerce_commerce_db?retryWrites=true&w=majority&appName=Cluster0
+    restart: on-failure
+
+  inventory-micro:
+    container_name: inventory_microservice
+    build:
+      context: ./inventory-service
+      dockerfile: Dockerfile
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+      - MONGO_URL=mongodb+srv://b80954643_db_user:Boyd1209@cluster0.oxcbzu5.mongodb.net/ecommerce_commerce_db?retryWrites=true&w=majority&appName=Cluster0
+    restart: on-failure
