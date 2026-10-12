@@ -2,6 +2,8 @@
 
 Backend-only ecommerce project built with JavaScript, Express, MongoDB, and Docker Compose.
 
+See [API_REFERENCE.md](API_REFERENCE.md) for service responsibilities, ports, endpoints, request formats, authentication requirements, and response examples.
+
 ## Services and ports
 
 | Service | Port | Main endpoint |

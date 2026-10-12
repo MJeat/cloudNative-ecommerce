@@ -9,13 +9,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 # Copy application source code
 COPY . .
 
 # Document the port the application listens on
-EXPOSE 5003
+EXPOSE 5009
 
 # Run the container as a non-root user for security
 USER node
