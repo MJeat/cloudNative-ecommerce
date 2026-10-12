@@ -8,10 +8,28 @@ services:
       - "5000:5000"
     environment:
       - GATEWAY_PORT=5000
-      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in the root .env file}
+      - JWT_SECRET=${JWT_SECRET}
       - ADMIN_SERVICE_URL=http://admin-micro:5001
+      - USER_SERVICE_URL=http://user-micro:5002
+      - REGISTRATION_SERVICE_URL=http://reg-micro:5003
+      - LOGIN_SERVICE_URL=http://login-micro:5004
+      - INVENTORY_SERVICE_URL=http://inventory-micro:5005
+      - PRODUCT_SERVICE_URL=http://product-micro:5006
+      - CATEGORY_SERVICE_URL=http://category-micro:5007
+      - REVIEW_SERVICE_URL=http://review-micro:5008
+      - ORDER_SERVICE_URL=http://order-micro:5009
+      - PAYMENT_SERVICE_URL=http://payment-micro:5010
     depends_on:
       - admin-micro
+      - user-micro
+      - reg-micro
+      - login-micro
+      - inventory-micro
+      - product-micro
+      - category-micro
+      - review-micro
+      - order-micro
+      - payment-micro
     restart: on-failure
 
   admin-micro:
@@ -23,19 +41,8 @@ services:
       - "5001"
     environment:
       - PORT=5001
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
-    restart: on-failure
-
-  login-micro:
-    container_name: login_microservice
-    build:
-      context: .
-      dockerfile: ./login/Dockerfile
-    expose:
-      - "5004"
-    environment:
-      - PORT=5004
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
+      - MONGO_URL=${MONGO_URL}
+      - JWT_SECRET=${JWT_SECRET}
     restart: on-failure
 
   user-micro:
@@ -47,7 +54,8 @@ services:
       - "5002"
     environment:
       - PORT=5002
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
+      - MONGO_URL=${MONGO_URL}
+      - JWT_SECRET=${JWT_SECRET}
     restart: on-failure
 
   reg-micro:
@@ -59,69 +67,21 @@ services:
       - "5003"
     environment:
       - PORT=5003
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
+      - MONGO_URL=${MONGO_URL}
+      - JWT_SECRET=${JWT_SECRET}
     restart: on-failure
 
-
-
-  order-micro:
-    container_name: order_microservice
+  login-micro:
+    container_name: login_microservice
     build:
-      context: ./order-service
-      dockerfile: Dockerfile
-    ports:
-      - "5009:5009"
+      context: .
+      dockerfile: ./login/Dockerfile
+    expose:
+      - "5004"
     environment:
-      - PORT=5009
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
-    restart: on-failure
-
-  product-micro:
-    container_name: product_microservice
-    build:
-      context: ./product-service
-      dockerfile: Dockerfile
-    ports:
-      - "5006:5006"
-    environment:
-      - PORT=5006
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
-    restart: on-failure
-
-  category-micro:
-    container_name: category_microservice
-    build:
-      context: ./category-service
-      dockerfile: Dockerfile
-    ports:
-      - "5007:5007"
-    environment:
-      - PORT=5007
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
-    restart: on-failure
-
-  review-micro:
-    container_name: review_microservice
-    build:
-      context: ./review-service
-      dockerfile: Dockerfile
-    ports:
-      - "5008:5008"
-    environment:
-      - PORT=5008
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
-    restart: on-failure
-
-  payment-micro:
-    container_name: payment_microservice
-    build:
-      context: ./payment-service
-      dockerfile: Dockerfile
-    ports:
-      - "5010:5010"
-    environment:
-      - PORT=5010
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
+      - PORT=5004
+      - MONGO_URL=${MONGO_URL}
+      - JWT_SECRET=${JWT_SECRET}
     restart: on-failure
 
   inventory-micro:
@@ -133,5 +93,65 @@ services:
       - "5005:5005"
     environment:
       - PORT=5005
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
+      - MONGO_URL=${MONGO_URL}
+    restart: on-failure
+
+  product-micro:
+    container_name: product_microservice
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    ports:
+      - "5006:5006"
+    environment:
+      - PORT=5006
+      - MONGO_URL=${MONGO_URL}
+    restart: on-failure
+
+  category-micro:
+    container_name: category_microservice
+    build:
+      context: ./category-service
+      dockerfile: Dockerfile
+    ports:
+      - "5007:5007"
+    environment:
+      - PORT=5007
+      - MONGO_URL=${MONGO_URL}
+    restart: on-failure
+
+  review-micro:
+    container_name: review_microservice
+    build:
+      context: ./review-service
+      dockerfile: Dockerfile
+    ports:
+      - "5008:5008"
+    environment:
+      - PORT=5008
+      - MONGO_URL=${MONGO_URL}
+    restart: on-failure
+
+  order-micro:
+    container_name: order_microservice
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "5009:5009"
+    environment:
+      - PORT=5009
+      - MONGO_URL=${MONGO_URL}
+    restart: on-failure
+
+  payment-micro:
+    container_name: payment_microservice
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    ports:
+      - "5010:5010"
+    environment:
+      - PORT=5010
+      - MONGO_URL=${MONGO_URL}
     restart: on-failure
