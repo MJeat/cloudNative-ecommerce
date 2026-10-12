@@ -3,7 +3,7 @@ const os = require('os');
 const Payment = require('./payment_schema');
 
 const app = express();
-const PORT = process.env.PORT || 5004;
+const PORT = process.env.PORT || 5010;
 
 app.use(express.json());
 

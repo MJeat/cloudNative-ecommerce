@@ -6,86 +6,76 @@ require('dotenv').config({
     path: path.join(__dirname, '.env')
 });
 
-// USE PROXY SERVER TO REDIRECT INCOMING REQUEST
 const httpProxy = require('http-proxy');
 const proxy = httpProxy.createProxyServer();
+const { authenticateToken, authorizeRole } = require('./auth.js');
 
-const { authenticateToken, authorizeRole } = require("./auth.js");
+const services = {
+    admin: process.env.ADMIN_SERVICE_URL || 'http://localhost:5001',
+    user: process.env.USER_SERVICE_URL || 'http://localhost:5002',
+    registration: process.env.REGISTRATION_SERVICE_URL || 'http://localhost:5003',
+    login: process.env.LOGIN_SERVICE_URL || 'http://localhost:5004',
+    inventory: process.env.INVENTORY_SERVICE_URL || 'http://localhost:5005',
+    product: process.env.PRODUCT_SERVICE_URL || 'http://localhost:5006',
+    category: process.env.CATEGORY_SERVICE_URL || 'http://localhost:5007',
+    review: process.env.REVIEW_SERVICE_URL || 'http://localhost:5008',
+    order: process.env.ORDER_SERVICE_URL || 'http://localhost:5009',
+    payment: process.env.PAYMENT_SERVICE_URL || 'http://localhost:5010'
+};
 
-app.get("/", (req,res) => {
-    res.send("Api gateway page")
-})
-app.use('/login', (req, res) => {
+const proxyTo = (target, servicePrefix = '') => (req, res) => {
+    if (servicePrefix) {
+        const requestPath = req.url === '/' ? '' : req.url;
+        req.url = `${servicePrefix}${requestPath}` || '/';
+    }
 
-    console.log("INSIDE API GATEWAY LOGIN ROUTE");
+    proxy.web(req, res, { target });
+};
 
-    proxy.web(req, res, {
-        target: 'http://localhost:5004'
-    });
+const adminOnlyForWrites = (req, res, next) => {
+    if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+        return next();
+    }
 
+    return authenticateToken(req, res, () =>
+        authorizeRole('admin')(req, res, next)
+    );
+};
+
+app.get('/', (req, res) => {
+    res.json({ service: 'api-gateway', status: 'ok' });
 });
 
-app.use('/reg', (req, res) => {
-
-    console.log("INSIDE API GATEWAY REG ROUTE");
-
-    proxy.web(req, res, {
-        target: 'http://localhost:5003'
-    });
-
+app.use('/login', proxyTo(services.login));
+app.use(['/register', '/reg'], proxyTo(services.registration));
+app.use(['/admin', '/ad'], authenticateToken, authorizeRole('admin'), proxyTo(services.admin));
+app.use('/user', authenticateToken, authorizeRole(['admin', 'user', 'student']), (req, res, next) => {
+    req.headers['x-user-id'] = req.user.sub;
+    proxyTo(services.user, '/users')(req, res, next);
 });
 
-app.use(
-    '/ad',
-    authenticateToken,
-    authorizeRole('admin'),
-    (req, res) => {
-
-        console.log("INSIDE API GATEWAY ADMIN ROUTE");
-
-        proxy.web(req, res, {
-            target: 'http://localhost:5001'
-        });
-
-    }
-);
-
-app.use(
-    '/user',
-    authenticateToken,
-    authorizeRole(['admin', 'user', 'student']),
-    (req, res) => {
-
-        console.log("INSIDE API GATEWAY USER ROUTE");
-
-        req.headers['x-user-id'] = req.user.sub;
-        req.url = `/users${req.url}`;
-
-        proxy.web(req, res, {
-            target: 'http://localhost:5002'
-        });
-
-    }
-);
+app.use('/products', adminOnlyForWrites, proxyTo(services.product, '/products'));
+app.use('/categories', adminOnlyForWrites, proxyTo(services.category, '/categories'));
+app.use('/inventory', authenticateToken, authorizeRole('admin'), proxyTo(services.inventory, '/inventory'));
+app.use('/orders', authenticateToken, authorizeRole(['admin', 'user', 'student']), proxyTo(services.order, '/orders'));
+app.use('/payments', authenticateToken, authorizeRole(['admin', 'user', 'student']), proxyTo(services.payment, '/payments'));
+app.use('/reviews', authenticateToken, authorizeRole(['admin', 'user', 'student']), proxyTo(services.review, '/reviews'));
 
 proxy.on('error', (error, req, res) => {
-
     console.error(`Proxy request failed: ${error.code}`);
 
-    if (!res.headersSent) {
-        res.writeHead(502, {
-            'Content-Type': 'application/json'
-        });
+    if (res.destroyed) {
+        return;
     }
 
-    res.end(JSON.stringify({
-        error: 'Service unavailable'
-    }));
+    if (res.headersSent) {
+        return res.end();
+    }
 
+    res.status(502).json({ error: 'Service unavailable' });
 });
 
-
-const port = process.env.PORT || 5005;
+const port = Number(process.env.GATEWAY_PORT || 5000);
 
 app.listen(port, () => {
     console.log(

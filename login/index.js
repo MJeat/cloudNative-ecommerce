@@ -6,7 +6,7 @@ app.use(bodyParser.json());
 
 const path = require('path');
 require('dotenv').config({
-    path: path.join(__dirname, '.env')
+    path: path.join(__dirname, '..', '.env')
 });
 
 app.use(express.urlencoded({ extended: false }));

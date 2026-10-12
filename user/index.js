@@ -4,7 +4,7 @@ require('dotenv').config()
 
 var bodyParser = require("body-parser");
 app.use(bodyParser.json());
-
+const mongoose = require('mongoose');
 const dbconnect = require('./dbconnect.js');
 const userModel = require('./user_schema.js');
 const bcrypt = require("bcrypt");

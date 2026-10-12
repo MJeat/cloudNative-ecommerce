@@ -2,8 +2,9 @@
   "name": "api_gateway",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "api-gateway.js",
   "scripts": {
+    "start": "node api-gateway.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

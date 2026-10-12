@@ -6,8 +6,8 @@ Backend-only ecommerce project built with JavaScript, Express, MongoDB, and Dock
 
 | Service | Port | Main endpoint |
 |---|---:|---|
-| Order | 5003 | `/orders` |
-| Payment | 5004 | `/payments` |
+| Order | 5009 | `/orders` |
+| Payment | 5010 | `/payments` |
 | Inventory | 5005 | `/inventory` |
 | Product | 5006 | `/products` |
 | Category | 5007 | `/categories` |
@@ -29,6 +29,8 @@ Start all services with:
 docker compose up --build
 ```
 
+Set `MONGO_URL` in the root `.env` file. Compose passes this same connection string to each database-backed service; the `.env` file is ignored by Git.
+
 ## Run and test with Podman
 
 Start the backend from the project folder:
@@ -40,12 +42,12 @@ podman compose up --build -d
 In Podman Desktop, open the published ports or test them in a browser:
 
 ```text
-http://localhost:5003/
-http://localhost:5004/
 http://localhost:5005/
 http://localhost:5006/
 http://localhost:5007/
 http://localhost:5008/
+http://localhost:5009/
+http://localhost:5010/
 ```
 
 The API endpoints are available at the service port followed by its path, for example:

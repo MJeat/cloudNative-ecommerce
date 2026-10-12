@@ -1,13 +1,17 @@
 // STEP-1 : IMPORT MONGOOSE PACKAGE
 const mongoose = require('mongoose');
 const dns = require('dns');
+const path = require('path');
+
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 try {
     dns.setServers(['8.8.8.8', '8.8.4.4']);
 } catch (e) {}
 
 // Database Connection URL
-const uri = process.env.MONGO_URL || "mongodb+srv://b80954643_db_user:Boyd1209@cluster0.oxcbzu5.mongodb.net/ecommerce_commerce_db?retryWrites=true&w=majority&appName=Cluster0";
+const uri = process.env.MONGO_URL;
+if (!uri) throw new Error('MONGO_URL is required');
 
 // STEP-2 : ESTABLISH CONNECTION WITH MONGODB DATABASE THROUGH MONGOOSE
 mongoose.connect(uri)

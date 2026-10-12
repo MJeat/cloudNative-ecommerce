@@ -1,27 +1,16 @@
 // STEP-1 : IMPORT MONGOOSE PACKAGE
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
-// Database Connection URL
-const uri = "mongodb+srv://titoleng77_db_user:WpKiSlO4kv3T6bar@cluster0.02ixnj9.mongodb.net/?appName=Cluster0"
-//OR
-//const uri = "mongodb://user1:<your password>@ac-irevfzj-shard-00-00.jh094ab.mongodb.net:27017,ac-irevfzj-shard-00-01.jh094ab.mongodb.net:27017,ac-irevfzj-shard-00-02.jh094ab.mongodb.net:27017/<your database name>?ssl=true&replicaSet=atlas-u04hq6-shard-0&authSource=admin&appName=MyCluster1
+const uri = process.env.MONGO_URL;
+if (!uri) throw new Error('MONGO_URL is required');
 
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
 
-async function run() {
-  try {
-    // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
-    // STEP-2 : ESTABLISH CONNECTION WITH MONGODB DATABASE THROUGH MONGOOSE
+async function connectDatabase() {
     await mongoose.connect(uri, clientOptions);
     await mongoose.connection.db.admin().command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    //await mongoose.disconnect();
-  }
+    console.log('Connected to MongoDB');
 }
-run().catch(console.dir);
 
-// STEP-3 : EXPORT MODULE mongoose because we need it in other JS file
-module.exports = mongoose;
+module.exports = connectDatabase;
