@@ -1,0 +1,49 @@
+services:
+  admin-micro:
+    container_name: admin_microservice
+    build:
+      context: .
+      dockerfile: ./admin/Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      PORT: 5001
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in identity.env}
+    restart: unless-stopped
+
+  user-micro:
+    container_name: user_microservice
+    build:
+      context: .
+      dockerfile: ./user/Dockerfile
+    ports:
+      - "5002:5002"
+    environment:
+      PORT: 5002
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in identity.env}
+    restart: unless-stopped
+
+  reg-micro:
+    container_name: reg_microservice
+    build:
+      context: .
+      dockerfile: ./registration/Dockerfile
+    ports:
+      - "5003:5003"
+    environment:
+      PORT: 5003
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in identity.env}
+    restart: unless-stopped
+
+  login-micro:
+    container_name: login_microservice
+    build:
+      context: .
+      dockerfile: ./login/Dockerfile
+    ports:
+      - "5004:5004"
+    environment:
+      PORT: 5004
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in identity.env}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in identity.env}
+    restart: unless-stopped

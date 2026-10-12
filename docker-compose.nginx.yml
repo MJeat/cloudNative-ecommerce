@@ -1,0 +1,12 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: ecommerce_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    extra_hosts:
+      - "gateway-a:${GATEWAY_A_PRIVATE_IP:?set GATEWAY_A_PRIVATE_IP}"
+      - "gateway-b:${GATEWAY_B_PRIVATE_IP:?set GATEWAY_B_PRIVATE_IP}"
+    restart: unless-stopped

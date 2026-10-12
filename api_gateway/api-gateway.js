@@ -75,7 +75,7 @@ proxy.on('error', (error, req, res) => {
     res.status(502).json({ error: 'Service unavailable' });
 });
 
-const port = Number(process.env.GATEWAY_PORT || 5000);
+const port = Number(process.env.GATEWAY_PORT || 5011);
 
 app.listen(port, () => {
     console.log(

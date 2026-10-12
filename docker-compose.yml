@@ -5,7 +5,7 @@ services:
       context: ./api_gateway
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "5011:5000"
     environment:
       - GATEWAY_PORT=5000
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in the root .env file}
@@ -88,8 +88,8 @@ services:
     build:
       context: ./order-service
       dockerfile: Dockerfile
-    ports:
-      - "5009:5009"
+    expose:
+      - "5009"
     environment:
       - PORT=5009
       - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
@@ -100,8 +100,8 @@ services:
     build:
       context: ./product-service
       dockerfile: Dockerfile
-    ports:
-      - "5006:5006"
+    expose:
+      - "5006"
     environment:
       - PORT=5006
       - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
@@ -112,8 +112,8 @@ services:
     build:
       context: ./category-service
       dockerfile: Dockerfile
-    ports:
-      - "5007:5007"
+    expose:
+      - "5007"
     environment:
       - PORT=5007
       - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
@@ -124,8 +124,8 @@ services:
     build:
       context: ./review-service
       dockerfile: Dockerfile
-    ports:
-      - "5008:5008"
+    expose:
+      - "5008"
     environment:
       - PORT=5008
       - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
@@ -136,8 +136,8 @@ services:
     build:
       context: ./payment-service
       dockerfile: Dockerfile
-    ports:
-      - "5010:5010"
+    expose:
+      - "5010"
     environment:
       - PORT=5010
       - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
@@ -148,8 +148,8 @@ services:
     build:
       context: ./inventory-service
       dockerfile: Dockerfile
-    ports:
-      - "5005:5005"
+    expose:
+      - "5005"
     environment:
       - PORT=5005
       - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
