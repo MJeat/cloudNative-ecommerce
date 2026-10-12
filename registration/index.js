@@ -3,14 +3,14 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const dbconnect = require('./dbconnect.js');
+const bcrypt = require('bcryptjs');
+const connectDatabase = require('./dbconnect.js');
 const createUserModel = require('../user/User.js');
 const User = createUserModel(mongoose);
 
 // REGISTER API
 
-app.post("/register", async (req, res) => {
+app.post(["/", "/register"], async (req, res) => {
     try {
 
         const { name, firstname, email, password, role, phone, mobile } = req.body;
@@ -30,7 +30,7 @@ app.post("/register", async (req, res) => {
 
         const passwordHash = await bcrypt.hash(password, 12);
         const user = await User.create({
-            name: name,
+            name: userName,
             email,
             passwordHash,
             role,
@@ -70,6 +70,13 @@ app.get("/", (req, res) => {
 
 
 // START SERVER
-app.listen(5003, () => {
-    console.log('EXPRESS Server Started at Port No: 5003');
-});
+connectDatabase()
+    .then(() => {
+        app.listen(Number(process.env.PORT || 5003), () => {
+            console.log(`Registration service started on port ${process.env.PORT || 5003}`);
+        });
+    })
+    .catch((error) => {
+        console.error('REGISTRATION DATABASE ERROR:', error.message);
+        process.exitCode = 1;
+    });

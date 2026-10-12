@@ -1,24 +1,13 @@
-# PRODUCTION READY
-# Use the official Node.js 24 Alpine image
 FROM node:24-alpine
 
-# Set the working directory inside the container
 WORKDIR /app
-
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
-# Install only production dependencies
-RUN npm install --omit=dev
-
-# Copy application source code
-COPY . .
-
-# Document the port the application listens on
-EXPOSE 5005
-
-# Run the container as a non-root user for security
+COPY login/package*.json ./login/
+WORKDIR /app/login
+RUN npm ci --omit=dev
+WORKDIR /app
+COPY login/index.js login/dbconnect.js ./login/
+COPY user/User.js ./user/User.js
+WORKDIR /app/login
+EXPOSE 5004
 USER node
-
-# Start the application
 CMD ["npm", "start"]

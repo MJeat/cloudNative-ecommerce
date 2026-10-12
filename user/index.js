@@ -1,13 +1,13 @@
 const express = require('express');
-var app = express();
-require('dotenv').config()
-
-var bodyParser = require("body-parser");
-app.use(bodyParser.json());
 const mongoose = require('mongoose');
-const dbconnect = require('./dbconnect.js');
-const userModel = require('./user_schema.js');
-const bcrypt = require("bcrypt");
+const connectDatabase = require('./dbconnect.js');
+const createUserModel = require('./User.js');
+const User = createUserModel(mongoose);
+const bcrypt = require('bcryptjs');
+const app = express();
+const port = Number(process.env.PORT || 5002);
+
+app.use(express.json());
 
 app.get("/",  (req,res) => {
     res.send("User Page")
@@ -15,7 +15,7 @@ app.get("/",  (req,res) => {
 
 app.get("/users/email/:email", async (req, res) => {
   try {
-    const user = await userModel.findOne({ email: req.params.email });
+    const user = await User.findOne({ email: req.params.email.toLowerCase() });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -29,7 +29,7 @@ app.get("/users/email/:email", async (req, res) => {
 
 app.get("/users", async (req, res) => {
     try {
-        const users = await userModel.find().select("-password");
+        const users = await User.find().select('-passwordHash');
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -39,14 +39,18 @@ app.get("/users", async (req, res) => {
 app.post("/users", async (req, res) => {
   try {
 
-    const { name, email, password, role, phone } = req.body;
+        const { name, email, password, role, phone } = req.body;
+
+        if (!name || !email || !password || !role) {
+            return res.status(400).json({ message: 'Name, email, password, and role are required' });
+        }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await userModel.create({
+        const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+            passwordHash: hashedPassword,
       role,
       phone
     });
@@ -58,6 +62,10 @@ app.post("/users", async (req, res) => {
       phone: user.phone
     });
   } catch (error) {
+        if (error.code === 11000) {
+            return res.status(409).json({ message: 'Email is already registered' });
+        }
+
     res.status(500).json({
       message: error.message
     });
@@ -65,8 +73,8 @@ app.post("/users", async (req, res) => {
 
 app.get("/email/:email", async (req, res) => {
   try {
-    const user = await userModel.findOne({
-      email: req.params.email
+        const user = await User.findOne({
+            email: req.params.email.toLowerCase()
     });
 
     if (!user) {
@@ -104,7 +112,7 @@ app.get("/users/search", async (req, res) => {
             };
         }
 
-        const users = await userModel.find(query).select("-password");
+        const users = await User.find(query).select('-passwordHash');
 
         if (users.length === 0) {
             return res.status(404).json({
@@ -136,8 +144,8 @@ app.get("/users/viewprofile", async (req, res) => {
             });
         }
 
-        const user = await userModel.findById(userId)
-            .select("-password");
+        const user = await User.findById(userId)
+            .select('-passwordHash');
 
         if (!user) {
             return res.status(404).json({
@@ -190,17 +198,17 @@ app.put("/users/updateprofile", async (req, res) => {
 
         // Hash password if user wants to change it
         if (password) {
-            updateData.password = await bcrypt.hash(password, 10);
+            updateData.passwordHash = await bcrypt.hash(password, 10);
         }
 
-        const updatedUser = await userModel.findByIdAndUpdate(
+        const updatedUser = await User.findByIdAndUpdate(
             userId,
             updateData,
             {
                 new: true,
                 runValidators: true
             }
-        ).select("-password");
+        ).select('-passwordHash');
 
         if (!updatedUser) {
             return res.status(404).json({
@@ -223,4 +231,11 @@ app.put("/users/updateprofile", async (req, res) => {
     }
 });
 // START THE EXPRESS SERVER. 5000 is the PORT NUMBER
-app.listen(5002, () => console.log('EXPRESS Server Started at Port No: 5002'));
+connectDatabase()
+    .then(() => {
+        app.listen(port, () => console.log(`User service started on port ${port}`));
+    })
+    .catch((error) => {
+        console.error('USER DATABASE ERROR:', error.message);
+        process.exitCode = 1;
+    });

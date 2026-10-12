@@ -10,8 +10,26 @@ services:
       - GATEWAY_PORT=5000
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in the root .env file}
       - ADMIN_SERVICE_URL=http://admin-micro:5001
+      - LOGIN_SERVICE_URL=http://login-micro:5004
+      - USER_SERVICE_URL=http://user-micro:5002
+      - REGISTRATION_SERVICE_URL=http://reg-micro:5003
+      - ORDER_SERVICE_URL=http://order-micro:5009
+      - PRODUCT_SERVICE_URL=http://product-micro:5006
+      - CATEGORY_SERVICE_URL=http://category-micro:5007
+      - REVIEW_SERVICE_URL=http://review-micro:5008
+      - PAYMENT_SERVICE_URL=http://payment-micro:5010
+      - INVENTORY_SERVICE_URL=http://inventory-micro:5005
     depends_on:
       - admin-micro
+      - login-micro
+      - user-micro
+      - reg-micro
+      - order-micro
+      - product-micro
+      - category-micro
+      - review-micro
+      - payment-micro
+      - inventory-micro
     restart: on-failure
 
   admin-micro:
@@ -36,6 +54,7 @@ services:
     environment:
       - PORT=5004
       - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in the root .env file}
     restart: on-failure
 
   user-micro:

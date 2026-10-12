@@ -12,9 +12,10 @@ require('dotenv').config({
 app.use(express.urlencoded({ extended: false }));
 
 const mongoose = require('mongoose');
+const connectDatabase = require('./dbconnect.js');
 const createUserModel = require('../user/User');
 const User = createUserModel(mongoose);
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 
@@ -93,6 +94,13 @@ app.post(["/", "/log"], async (req, res) => {
     }
 });
 
-app.listen(5004, () => {
-    console.log('EXPRESS Server Started at Port No: 5004');
-});
+connectDatabase()
+    .then(() => {
+        app.listen(Number(process.env.PORT || 5004), () => {
+            console.log(`Login service started on port ${process.env.PORT || 5004}`);
+        });
+    })
+    .catch((error) => {
+        console.error('LOGIN DATABASE ERROR:', error.message);
+        process.exitCode = 1;
+    });
