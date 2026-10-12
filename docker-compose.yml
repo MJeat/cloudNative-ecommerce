@@ -93,7 +93,7 @@ services:
       - "5005:5005"
     environment:
       - PORT=5005
-      - MONGO_URL=${MONGO_URL}
+      - MONGO_URL=${COMMERCE_MONGO_URL:-${MONGO_URL}}
     restart: on-failure
 
   product-micro:
@@ -141,7 +141,7 @@ services:
       - "5009:5009"
     environment:
       - PORT=5009
-      - MONGO_URL=${MONGO_URL}
+      - MONGO_URL=${COMMERCE_MONGO_URL:-${MONGO_URL}}
     restart: on-failure
 
   payment-micro:
@@ -153,5 +153,5 @@ services:
       - "5010:5010"
     environment:
       - PORT=5010
-      - MONGO_URL=${MONGO_URL}
+      - MONGO_URL=${COMMERCE_MONGO_URL:-${MONGO_URL}}
     restart: on-failure
