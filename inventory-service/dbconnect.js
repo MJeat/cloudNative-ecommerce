@@ -10,8 +10,7 @@ try {
 } catch (e) {}
 
 // Database Connection URL
-const uri = process.env.MONGO_URL;
-if (!uri) throw new Error('MONGO_URL is required');
+const uri = process.env.COMMERCE_MONGO_URL || process.env.MONGO_URL || "mongodb+srv://titoleng77_db_user:WpKiSlO4kv3T6bar@cluster0.02ixnj9.mongodb.net/commerce_db?retryWrites=true&w=majority&appName=Cluster0";
 
 // STEP-2 : ESTABLISH CONNECTION WITH MONGODB DATABASE THROUGH MONGOOSE
 mongoose.connect(uri)
