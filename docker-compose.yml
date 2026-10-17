@@ -39,15 +39,6 @@ services:
       - review-micro
       - order-micro
       - payment-micro
-      - login-micro
-      - user-micro
-      - reg-micro
-      - order-micro
-      - product-micro
-      - category-micro
-      - review-micro
-      - payment-micro
-      - inventory-micro
     restart: on-failure
 
   admin-micro:
@@ -109,8 +100,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5005:5005"
-    expose:
-      - "5009"
     environment:
       - PORT=5005
       - MONGO_URL=${COMMERCE_MONGO_URL:-${MONGO_URL}}
@@ -173,17 +162,5 @@ services:
       - "5010"
     environment:
       - PORT=5010
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
-    restart: on-failure
-
-  inventory-micro:
-    container_name: inventory_microservice
-    build:
-      context: ./inventory-service
-      dockerfile: Dockerfile
-    expose:
-      - "5005"
-    environment:
-      - PORT=5005
       - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
     restart: on-failure
