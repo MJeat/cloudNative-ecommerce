@@ -1,4 +1,5 @@
 const express = require('express');
+const os = require('os');
 const app = express();
 
 const path = require('path');
@@ -43,7 +44,11 @@ const adminOnlyForWrites = (req, res, next) => {
 };
 
 app.get('/', (req, res) => {
-    res.json({ service: 'api-gateway', status: 'ok' });
+    res.json({
+        service: 'api-gateway',
+        status: 'ok',
+        gateway: process.env.GATEWAY_ID || os.hostname()
+    });
 });
 
 app.use('/login', proxyTo(services.login));

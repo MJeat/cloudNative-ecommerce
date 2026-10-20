@@ -8,6 +8,7 @@ services:
       - "${GATEWAY_HOST_PORT:-5011}:5000"
     environment:
       GATEWAY_PORT: 5000
+      GATEWAY_ID: ${GATEWAY_ID:?set GATEWAY_ID to gateway-a or gateway-b}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in gateway.env}
       ADMIN_SERVICE_URL: ${ADMIN_SERVICE_URL:?set ADMIN_SERVICE_URL in gateway.env}
       LOGIN_SERVICE_URL: ${LOGIN_SERVICE_URL:?set LOGIN_SERVICE_URL in gateway.env}
