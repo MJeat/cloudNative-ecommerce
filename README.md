@@ -70,3 +70,48 @@ The public application URL is the Nginx server:
 ```text
 http://<NGINX_PUBLIC_IP>/
 ```
+
+
+# Structure
+
+                    ┌─────────────────────┐
+                    │   Client / Browser  │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │  EC2 1: Nginx       │
+                    │  Load Balancer :80  │
+                    └───────┬─────┬───────┘
+                            │     │
+              Private IP:5011     │ Private IP:5011
+                            │     │
+             ┌──────────────▼─┐ ┌─▼──────────────┐
+             │ EC2 2: Gateway A│ │ EC2 3: Gateway B│
+             │ API Gateway     │ │ API Gateway     │
+             │ Port 5011       │ │ Port 5011       │
+             ├─────────────────┤ ├─────────────────┤
+             │ Admin           │ │ Admin           │
+             │ User            │ │ User            │
+             │ Registration    │ │ Registration    │
+             │ Login           │ │ Login           │
+             │ Inventory       │ │ Inventory       │
+             │ Product         │ │ Product         │
+             │ Category        │ │ Category        │
+             │ Review          │ │ Review          │
+             │ Order           │ │ Order           │
+             │ Payment         │ │ Payment         │
+             │ Redis           │ │ Redis           │
+             └────────┬────────┘ └────────┬────────┘
+                      │                   │
+                      └─────────┬─────────┘
+                                ▼
+                       ┌──────────────────┐
+                       │   MongoDB Atlas  │
+                       └──────────────────┘
+
+
+- Gateway A  -> docker-compose.gateway-a.yml
+- Gateway B  -> docker-compose.gateway-b.yml
+- Nginx      -> docker-compose.nginx.yml
+
