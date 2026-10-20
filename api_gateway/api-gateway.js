@@ -1,6 +1,7 @@
 const express = require('express');
 const os = require('os');
 const app = express();
+const { createClient } = require('redis');
 
 const path = require('path');
 require('dotenv').config({
@@ -10,6 +11,13 @@ require('dotenv').config({
 const httpProxy = require('http-proxy');
 const proxy = httpProxy.createProxyServer();
 const { authenticateToken, authorizeRole } = require('./auth.js');
+const redisClient = createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379'
+});
+
+redisClient.on('error', (error) => {
+    console.error('Redis connection error:', error.message);
+});
 
 const services = {
     admin: process.env.ADMIN_SERVICE_URL || 'http://localhost:5001',
@@ -43,12 +51,14 @@ const adminOnlyForWrites = (req, res, next) => {
     );
 };
 
-app.get('/', (req, res) => {
-    res.json({
-        service: 'api-gateway',
-        status: 'ok',
-        gateway: process.env.GATEWAY_ID || os.hostname()
-    });
+app.get('/', async (req, res) => {
+    try {
+        const numberOfVisits = await redisClient.incr('numVisits');
+        res.send(`${os.hostname()}: Number of visits is: ${numberOfVisits}`);
+    } catch (error) {
+        console.error('Visit counter error:', error.message);
+        res.status(503).json({ error: 'Visit counter unavailable' });
+    }
 });
 
 app.use('/login', proxyTo(services.login));
@@ -82,9 +92,14 @@ proxy.on('error', (error, req, res) => {
 
 const port = Number(process.env.GATEWAY_PORT || 5011);
 
-app.listen(port, () => {
-    console.log(
-        "API Gateway Service is running on PORT NO : ",
-        port
-    );
+async function startServer() {
+    await redisClient.connect();
+    app.listen(port, () => {
+        console.log(`API Gateway Service is running on port ${port}`);
+    });
+}
+
+startServer().catch((error) => {
+    console.error('API Gateway startup failed:', error.message);
+    process.exit(1);
 });

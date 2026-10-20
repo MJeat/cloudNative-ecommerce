@@ -5,7 +5,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx.ec2.conf:/etc/nginx/nginx.conf:ro
     extra_hosts:
       # These are container-local host entries: name -> EC2 private IP.
       - "gateway-a:${GATEWAY_A_PRIVATE_IP:?set GATEWAY_A_PRIVATE_IP}"

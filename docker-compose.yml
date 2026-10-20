@@ -1,34 +1,169 @@
 services:
-  api-gateway:
-    container_name: api-gateway
+  redis:
+    container_name: ecommerce_redis
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  nginx:
+    container_name: ecommerce_nginx
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - gateway-a
+      - gateway-b
+    restart: unless-stopped
+
+  admin-micro:
+    container_name: admin_microservice
+    build:
+      context: .
+      dockerfile: ./admin/Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      PORT: 5001
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in .env}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret}
+    restart: unless-stopped
+
+  user-micro:
+    container_name: user_microservice
+    build:
+      context: .
+      dockerfile: ./user/Dockerfile
+    ports:
+      - "5002:5002"
+    environment:
+      PORT: 5002
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in .env}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret}
+    restart: unless-stopped
+
+  reg-micro:
+    container_name: reg_microservice
+    build:
+      context: .
+      dockerfile: ./registration/Dockerfile
+    ports:
+      - "5003:5003"
+    environment:
+      PORT: 5003
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in .env}
+    restart: unless-stopped
+
+  login-micro:
+    container_name: login_microservice
+    build:
+      context: .
+      dockerfile: ./login/Dockerfile
+    ports:
+      - "5004:5004"
+    environment:
+      PORT: 5004
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in .env}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret}
+    restart: unless-stopped
+
+  inventory-micro:
+    container_name: inventory_microservice
+    build:
+      context: ./inventory-service
+      dockerfile: Dockerfile
+    ports:
+      - "5005:5005"
+    environment:
+      PORT: 5005
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped
+
+  product-micro:
+    container_name: product_microservice
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    ports:
+      - "5006:5006"
+    environment:
+      PORT: 5006
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped
+
+  category-micro:
+    container_name: category_microservice
+    build:
+      context: ./category-service
+      dockerfile: Dockerfile
+    ports:
+      - "5007:5007"
+    environment:
+      PORT: 5007
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped
+
+  review-micro:
+    container_name: review_microservice
+    build:
+      context: ./review-service
+      dockerfile: Dockerfile
+    ports:
+      - "5008:5008"
+    environment:
+      PORT: 5008
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped
+
+  order-micro:
+    container_name: order_microservice
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "5009:5009"
+    environment:
+      PORT: 5009
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped
+
+  payment-micro:
+    container_name: payment_microservice
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    ports:
+      - "5010:5010"
+    environment:
+      PORT: 5010
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped
+
+  gateway-a:
+    container_name: gateway_a
+    hostname: gateway-a
     build:
       context: ./api_gateway
       dockerfile: Dockerfile
     ports:
       - "5011:5000"
     environment:
-      - GATEWAY_PORT=5000
-      - JWT_SECRET=${JWT_SECRET}
-      - ADMIN_SERVICE_URL=http://admin-micro:5001
-      - USER_SERVICE_URL=http://user-micro:5002
-      - REGISTRATION_SERVICE_URL=http://reg-micro:5003
-      - LOGIN_SERVICE_URL=http://login-micro:5004
-      - INVENTORY_SERVICE_URL=http://inventory-micro:5005
-      - PRODUCT_SERVICE_URL=http://product-micro:5006
-      - CATEGORY_SERVICE_URL=http://category-micro:5007
-      - REVIEW_SERVICE_URL=http://review-micro:5008
-      - ORDER_SERVICE_URL=http://order-micro:5009
-      - PAYMENT_SERVICE_URL=http://payment-micro:5010
-      - LOGIN_SERVICE_URL=http://login-micro:5004
-      - USER_SERVICE_URL=http://user-micro:5002
-      - REGISTRATION_SERVICE_URL=http://reg-micro:5003
-      - ORDER_SERVICE_URL=http://order-micro:5009
-      - PRODUCT_SERVICE_URL=http://product-micro:5006
-      - CATEGORY_SERVICE_URL=http://category-micro:5007
-      - REVIEW_SERVICE_URL=http://review-micro:5008
-      - PAYMENT_SERVICE_URL=http://payment-micro:5010
-      - INVENTORY_SERVICE_URL=http://inventory-micro:5005
+      GATEWAY_PORT: 5000
+      GATEWAY_ID: gateway-a
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret}
+      ADMIN_SERVICE_URL: http://admin-micro:5001
+      USER_SERVICE_URL: http://user-micro:5002
+      REGISTRATION_SERVICE_URL: http://reg-micro:5003
+      LOGIN_SERVICE_URL: http://login-micro:5004
+      INVENTORY_SERVICE_URL: http://inventory-micro:5005
+      PRODUCT_SERVICE_URL: http://product-micro:5006
+      CATEGORY_SERVICE_URL: http://category-micro:5007
+      REVIEW_SERVICE_URL: http://review-micro:5008
+      ORDER_SERVICE_URL: http://order-micro:5009
+      PAYMENT_SERVICE_URL: http://payment-micro:5010
     depends_on:
+      - redis
       - admin-micro
       - user-micro
       - reg-micro
@@ -39,128 +174,154 @@ services:
       - review-micro
       - order-micro
       - payment-micro
-    restart: on-failure
+    restart: unless-stopped
 
-  admin-micro:
-    container_name: admin_microservice
+  gateway-b:
+    container_name: gateway_b
+    hostname: gateway-b
+    build:
+      context: ./api_gateway
+      dockerfile: Dockerfile
+    ports:
+      - "5012:5000"
+    environment:
+      GATEWAY_PORT: 5000
+      GATEWAY_ID: gateway-b
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret}
+      ADMIN_SERVICE_URL: http://b-admin-micro:5001
+      USER_SERVICE_URL: http://b-user-micro:5002
+      REGISTRATION_SERVICE_URL: http://b-reg-micro:5003
+      LOGIN_SERVICE_URL: http://b-login-micro:5004
+      INVENTORY_SERVICE_URL: http://b-inventory-micro:5005
+      PRODUCT_SERVICE_URL: http://b-product-micro:5006
+      CATEGORY_SERVICE_URL: http://b-category-micro:5007
+      REVIEW_SERVICE_URL: http://b-review-micro:5008
+      ORDER_SERVICE_URL: http://b-order-micro:5009
+      PAYMENT_SERVICE_URL: http://b-payment-micro:5010
+    depends_on:
+      - redis
+      - b-admin-micro
+      - b-user-micro
+      - b-reg-micro
+      - b-login-micro
+      - b-inventory-micro
+      - b-product-micro
+      - b-category-micro
+      - b-review-micro
+      - b-order-micro
+      - b-payment-micro
+    restart: unless-stopped
+
+  b-admin-micro:
     build:
       context: .
       dockerfile: ./admin/Dockerfile
     expose:
       - "5001"
     environment:
-      - PORT=5001
-      - MONGO_URL=${MONGO_URL}
-      - JWT_SECRET=${JWT_SECRET}
-    restart: on-failure
+      PORT: 5001
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in .env}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret}
+    restart: unless-stopped
 
-  user-micro:
-    container_name: user_microservice
+  b-user-micro:
     build:
       context: .
       dockerfile: ./user/Dockerfile
     expose:
       - "5002"
     environment:
-      - PORT=5002
-      - MONGO_URL=${MONGO_URL}
-      - JWT_SECRET=${JWT_SECRET}
-    restart: on-failure
+      PORT: 5002
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in .env}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret}
+    restart: unless-stopped
 
-  reg-micro:
-    container_name: reg_microservice
+  b-reg-micro:
     build:
       context: .
       dockerfile: ./registration/Dockerfile
     expose:
       - "5003"
     environment:
-      - PORT=5003
-      - MONGO_URL=${MONGO_URL}
-      - JWT_SECRET=${JWT_SECRET}
-    restart: on-failure
+      PORT: 5003
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in .env}
+    restart: unless-stopped
 
-  login-micro:
-    container_name: login_microservice
+  b-login-micro:
     build:
       context: .
       dockerfile: ./login/Dockerfile
     expose:
       - "5004"
     environment:
-      - PORT=5004
-      - MONGO_URL=${MONGO_URL}
-      - JWT_SECRET=${JWT_SECRET}
-    restart: on-failure
+      PORT: 5004
+      MONGO_URL: ${MONGO_URL:?set MONGO_URL in .env}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret}
+    restart: unless-stopped
 
-  inventory-micro:
-    container_name: inventory_microservice
+  b-inventory-micro:
     build:
       context: ./inventory-service
       dockerfile: Dockerfile
-    ports:
-      - "5005:5005"
+    expose:
+      - "5005"
     environment:
-      - PORT=5005
-      - MONGO_URL=${COMMERCE_MONGO_URL:-${MONGO_URL}}
-    restart: on-failure
+      PORT: 5005
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped
 
-  product-micro:
-    container_name: product_microservice
+  b-product-micro:
     build:
       context: ./product-service
       dockerfile: Dockerfile
     expose:
       - "5006"
     environment:
-      - PORT=5006
-      - MONGO_URL=${MONGO_URL}
-    restart: on-failure
+      PORT: 5006
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped
 
-  category-micro:
-    container_name: category_microservice
+  b-category-micro:
     build:
       context: ./category-service
       dockerfile: Dockerfile
     expose:
       - "5007"
     environment:
-      - PORT=5007
-      - MONGO_URL=${MONGO_URL}
-    restart: on-failure
+      PORT: 5007
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped
 
-  review-micro:
-    container_name: review_microservice
+  b-review-micro:
     build:
       context: ./review-service
       dockerfile: Dockerfile
     expose:
       - "5008"
     environment:
-      - PORT=5008
-      - MONGO_URL=${MONGO_URL}
-    restart: on-failure
+      PORT: 5008
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped
 
-  order-micro:
-    container_name: order_microservice
+  b-order-micro:
     build:
       context: ./order-service
       dockerfile: Dockerfile
-    ports:
-      - "5009:5009"
+    expose:
+      - "5009"
     environment:
-      - PORT=5009
-      - MONGO_URL=${COMMERCE_MONGO_URL:-${MONGO_URL}}
-    restart: on-failure
+      PORT: 5009
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped
 
-  payment-micro:
-    container_name: payment_microservice
+  b-payment-micro:
     build:
       context: ./payment-service
       dockerfile: Dockerfile
     expose:
       - "5010"
     environment:
-      - PORT=5010
-      - MONGO_URL=${MONGO_URL:?MONGO_URL must be set in the root .env file}
-    restart: on-failure
+      PORT: 5010
+      MONGO_URL: ${COMMERCE_MONGO_URL:-${MONGO_URL:?set MONGO_URL or COMMERCE_MONGO_URL in .env}}
+    restart: unless-stopped

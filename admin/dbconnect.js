@@ -1,6 +1,6 @@
 // STEP-1 : IMPORT MONGOOSE PACKAGE
 const mongoose = require('mongoose');
-jrequire('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
 const uri = process.env.MONGO_URL;
 if (!uri) throw new Error('MONGO_URL is required');
